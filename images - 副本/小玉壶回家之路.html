@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>小玉壶回家之路</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Arial Rounded MT Bold', sans-serif;
+            background-color: #f9f3e9;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        h1 {
+            color: #4a3c28;
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(255,255,255,0.7);
+        }
+        .subtitle {
+            color: #5d4d3a;
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 25px;
+            background-color: rgba(255,255,255,0.6);
+            padding: 6px 12px;
+            border-radius: 15px;
+            display: inline-block;
+            margin-left: 50%;
+            transform: translateX(-50%);
+        }
+        .photo {
+            width: 100px;
+            height: 100px;
+            margin: 6px;
+            cursor: grab;
+            object-fit: contain;
+            border: none;
+            background: none;
+            user-select: none;
+        }
+        .photo:active {
+            cursor: grabbing;
+            transform: scale(1.05);
+        }
+        #photoList {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 25px;
+            background-color: rgba(255,255,255,0.7);
+            padding: 12px;
+            border-radius: 15px;
+        }
+        #dropArea {
+            width: 1000px;
+            height: 600px;
+            margin: 0 auto;
+            border: 2px dashed #4a3c28;
+            border-radius: 15px;
+            background-color: rgba(255,255,255,0.5);
+            position: relative;
+            background-image: url('背景1.png');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+        }
+        .dropped-photo {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            cursor: move;
+            user-select: none;
+        }
+        .road-marker {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(255,255,255,0.8);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #4a3c28;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-weight: bold;
+            border: 1px solid #d4af37;
+        }
+        .controls {
+            text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 0 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #a0522d;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body>
+   <h1>小玉壶回家之路</h1>
+    <div class="subtitle">根据所学规律，结合想象力为小玉壶铺设一条不一样的回家的路吧！</div>
+
+    
+    <!-- 待拖拽图片列表 -->
+    <div id="photoList">
+        <img class="photo" id="img1" src="p1.png" alt="p1">
+        <img class="photo" id="img2" src="p2.png" alt="p2">
+        <img class="photo" id="img3" src="p3.png" alt="p3">
+        <img class="photo" id="img4" src="p4.png" alt="p4">
+        <img class="photo" id="img5" src="p5.png" alt="p5">
+        <img class="photo" id="img6" src="p6.png" alt="p6">
+        <img class="photo" id="img7" src="p7.png" alt="p7">
+        <img class="photo" id="img8" src="p8.png" alt="p8">
+        <img class="photo" id="img9" src="p9.png" alt="p9">
+        <img class="photo" id="img10" src="p10.png" alt="p10">
+        <img class="photo" id="img11" src="p11.png" alt="p11">
+        <img class="photo" id="img12" src="p12.png" alt="p12">
+    </div>
+
+    <!-- 拖拽目标区域 -->
+    <div id="dropArea">
+        <div class="road-marker">🚪 终点：小玉壶的家</div>
+    </div>
+
+    <div class="controls">
+        <button id="undoBtn">↩️ 返回上一步</button>
+        <button id="clearBtn">🗑️ 清空路面</button>
+    </div>
+
+    <script>
+        const dropArea = document.getElementById('dropArea');
+        const photoList = document.getElementById('photoList');
+        let draggingPhoto = null;
+        let offsetX = 0;
+        let offsetY = 0;
+        let history = []; // 用于记录历史操作
+
+        // 初始化待拖拽图片的拖拽事件
+        document.querySelectorAll('.photo').forEach(photo => {
+            photo.draggable = true;
+            photo.addEventListener('dragstart', handleDragStart);
+        });
+
+        // 处理拖拽开始
+        function handleDragStart(e) {
+            draggingPhoto = this.cloneNode(true);
+            draggingPhoto.classList.remove('photo');
+            draggingPhoto.classList.add('dropped-photo');
+            e.dataTransfer.setData('text/plain', this.id);
+        }
+
+        // 拖拽区域事件
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, e => {
+                e.preventDefault();
+                dropArea.style.borderColor = '#d4b16a';
+            });
+        });
+
+        dropArea.addEventListener('dragleave', () => {
+            dropArea.style.borderColor = '#4a3c28';
+        });
+
+        // 处理拖拽放入
+        dropArea.addEventListener('drop', e => {
+            e.preventDefault();
+            dropArea.style.borderColor = '#4a3c28';
+            
+            const photoId = e.dataTransfer.getData('text/plain');
+            const originalPhoto = document.getElementById(photoId);
+            
+            if (originalPhoto && draggingPhoto) {
+                // 记录当前状态用于撤销
+                saveHistory();
+                
+                const areaRect = dropArea.getBoundingClientRect();
+                const x = e.clientX - areaRect.left - draggingPhoto.offsetWidth / 2;
+                const y = e.clientY - areaRect.top - draggingPhoto.offsetHeight / 2;
+
+                draggingPhoto.style.left = `${Math.max(0, Math.min(x, areaRect.width - 100))}px`;
+                draggingPhoto.style.top = `${Math.max(0, Math.min(y, areaRect.height - 100))}px`;
+
+                dropArea.appendChild(draggingPhoto);
+                initMoveable(draggingPhoto);
+                draggingPhoto = null;
+            }
+        });
+
+        // 初始化图片在目标区域的移动功能
+        function initMoveable(img) {
+            img.addEventListener('mousedown', e => {
+                const rect = img.getBoundingClientRect();
+                const areaRect = dropArea.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+
+                // 记录移动前的状态
+                const startLeft = parseInt(img.style.left);
+                const startTop = parseInt(img.style.top);
+
+                function move(e) {
+                    let x = e.clientX - areaRect.left - offsetX;
+                    let y = e.clientY - areaRect.top - offsetY;
+                    x = Math.max(0, Math.min(x, areaRect.width - img.offsetWidth));
+                    y = Math.max(0, Math.min(y, areaRect.height - img.offsetHeight));
+                    
+                    img.style.left = `${x}px`;
+                    img.style.top = `${y}px`;
+                }
+
+                function stopMove() {
+                    // 检查是否有移动
+                    const endLeft = parseInt(img.style.left);
+                    const endTop = parseInt(img.style.top);
+                    if (endLeft !== startLeft || endTop !== startTop) {
+                        saveHistory();
+                    }
+                    document.removeEventListener('mousemove', move);
+                    document.removeEventListener('mouseup', stopMove);
+                }
+
+                document.addEventListener('mousemove', move);
+                document.addEventListener('mouseup', stopMove);
+            });
+        }
+
+        // 保存当前状态到历史记录
+        function saveHistory() {
+            const state = Array.from(dropArea.querySelectorAll('.dropped-photo')).map(img => ({
+                src: img.src,
+                left: img.style.left,
+                top: img.style.top
+            }));
+            history.push(state);
+            // 限制历史记录数量
+            if (history.length > 20) history.shift();
+        }
+
+        // 返回上一步
+        document.getElementById('undoBtn').addEventListener('click', () => {
+            if (history.length === 0) return;
+            
+            // 恢复上一个状态
+            const prevState = history.pop();
+            dropArea.innerHTML = '<div class="road-marker">🚪 终点：小玉壶的家</div>';
+            
+            prevState.forEach(item => {
+                const img = document.createElement('img');
+                img.src = item.src;
+                img.className = 'dropped-photo';
+                img.style.left = item.left;
+                img.style.top = item.top;
+                dropArea.appendChild(img);
+                initMoveable(img);
+            });
+        });
+
+        // 清空路面
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            saveHistory();
+            dropArea.innerHTML = '<div class="road-marker">🚪 终点：小玉壶的家</div>';
+        });
+    </script>
+</body>
+</html>
